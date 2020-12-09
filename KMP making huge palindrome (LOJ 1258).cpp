@@ -1,74 +1,50 @@
 #include <bits/stdc++.h>
 using namespace std;
-#define LIM 1000050
+#define  LL    long long int
+#define  LIM   1000005
+#define  base1 129
+#define  base2 137
+#define  MOD1  1479386893
+#define  MOD2  1928476349
 
 
-string text, pat;
-int sz, lps[LIM], lps2[LIM];
+string text;
+LL pow1[LIM], pow2[LIM];
 
-void create_lps(){
-    int i = 0, j;
-    for(j = 1; j < sz; j++){
-        if(pat[i] == pat[j]){
-            lps[j] = i+1;
-            i++;
-        }
-        else{
-            while(1){
-                if(i <= 0) break;
-                i = lps[i-1];
-                if(pat[i] == pat[j]){
-                    lps[j] = i+1;
-                    ++i;
-                    break;
-                }
-            }
-        }
+void calPower(){
+    pow1[0] = pow2[0] = 1;
+    for(int i = 1; i < LIM; i++){
+        pow1[i] = (pow1[i-1]*base1)%MOD1;
+        pow2[i] = (pow2[i-1]*base2)%MOD2;
     }
 }
 
-void check(){
-    int i = 0, j;
-    for(j = 0; j < sz; j++){
-        if(pat[i] == text[j]){
-            lps2[j] = i+1;
-            i++;
-        }
-        else{
-            while(1){
-                if(i <= 0) break;
-                i = lps[i-1];
-                if(pat[i] == text[j]){
-                    lps2[j] = i+1;
-                    ++i;
-                    break;
-                }
-            }
-        }
+int getHash(){
+    LL hash1 = 0, hash2 = 0, revHash1 = 0, revHash2 = 0;
+    int res = 1;
+    for(int i = 0; text[i]; i++){
+        hash1 = ((hash1*base1)%MOD1 + (text[i]-'a' + 1))%MOD1;
+        hash2 = ((hash2*base2)%MOD2 + (text[i] - 'a' + 1))%MOD2;
+        revHash1 = (revHash1 + ((text[i]-'a' + 1)*pow1[i])%MOD1)% MOD1;
+        revHash2 = (revHash2 + ((text[i]-'a' + 1)*pow2[i])%MOD2)% MOD2;
+        if(hash1 == revHash1 && hash2 == revHash2) res = max(res, i+1);
     }
+    return res;
 }
 
 int main(){
-    //freopen("in.txt", "r", stdin);
-    int T; scanf("%d", &T);
+    calPower();
+    int T; cin>>T;
     for(int t = 1; t <= T; t++){
         cin>>text;
-        pat = text;
-        reverse(pat.begin(), pat.end());
-        sz = text.size();
-        for(int i = 0; i <= sz; i++) lps[i] = 0;
-        create_lps(); /// for pattern
-        for(int i = 0; i <= sz; i++) lps2[i] = 0;
-        check();
-//        for(int i = 0; i < sz; i++) cout<<i<<"h "<<lps[i]<<' ';
-//        cout<<"\n\n";
-//        for(int i = 0; i < sz; i++) cout<<lps2[i]<<' ';
-//        cout<<"\n\n";
-        int matched = lps2[sz-1];
-        //cout<<matched<<'\n';
-        int notMatched = sz-matched;
-        //cout<<(matched+(notMatched)*2)<<'\n';
-        int res = (matched+(notMatched)*2);
+        string tmp = text;
+        reverse(text.begin(), text.end());
+
+        int res = getHash();
+        int matched = res;
+        res = (text.size()-res)*2 + res;
         printf("Case %d: %d\n", t, res);
     }
 }
+
+
